@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>إيموجي في الوسط</title>
+  <style>
+    html,body{height:100%;margin:0;font-family:Arial,sans-serif}
+    .wrap{
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#f8f9fa,#ffe9f0);
+      text-align:center;
+      padding:20px;
+      box-sizing:border-box;
+    }
+    .card{
+      padding:30px 40px;
+      border-radius:12px;
+      box-shadow:0 8px 30px rgba(20,30,80,0.08);
+      background:rgba(255,255,255,0.9);
+      min-width:240px;
+    }
+    .emoji{
+      font-size:clamp(48px,10vw,128px);
+      margin-bottom:14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="emoji" id="emoji">🍓</div>
+    </div>
+  </div>
+</body>
+</html>
