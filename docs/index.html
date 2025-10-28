@@ -72,9 +72,9 @@
 <body>
     
     <div class="wrap">
-        <!-- صوت فقاعة مدمج بالـBase64 -->
+        <!-- صوت الفقاعه -->
         <audio id="click-sound-fx" preload="auto">
-            <source src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA..." type="audio/mpeg">
+            <source src="Bubble%20sound%20.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
         
@@ -83,13 +83,15 @@
     </div>
     
     <script>
+        // جلب عدد النقرات من localStorage أو تعيين 0
         let clickCount = parseInt(localStorage.getItem('bubbleClicks')) || 0; 
         
         const bubbleButton = document.getElementById('bubble-button'); 
         const countDisplay = document.getElementById('click-count');
         const wrapElement = document.querySelector('.wrap'); 
         const clickSound = document.getElementById('click-sound-fx'); 
-        clickSound.load(); // تأكد الصوت جاهز فورًا
+        
+        clickSound.load(); // تحضير الصوت فورًا
 
         function updateTextDisplay() {
             countDisplay.textContent = 'Total Clicks: ' + clickCount;
@@ -107,7 +109,6 @@
         }
         
         function playClickSound() {
-            // نسخ الصوت لتشغيله مباشرة بدون تأخير
             const soundClone = clickSound.cloneNode(true);
             soundClone.currentTime = 0;
             soundClone.play().catch(err => console.warn("Sound play blocked:", err));
@@ -130,7 +131,7 @@
 
             createFloatingBubble(clickX, clickY);
             updateTextDisplay(); 
-            localStorage.setItem('bubbleClicks', clickCount); 
+            localStorage.setItem('bubbleClicks', clickCount); // حفظ النقرات للأبد
         }
 
         bubbleButton.addEventListener('click', handleBubbleClick);
