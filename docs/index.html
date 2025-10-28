@@ -6,6 +6,7 @@
     <title>Interactive Bubble Popper</title>
     
     <style>
+        /* CSS Styles remain the same */
         html, body {
             height: 100%;
             margin: 0;
@@ -70,7 +71,7 @@
     
     <div class="wrap">
         <audio id="click-sound-fx" preload="auto">
-            <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU5LjE2LjEwMAAAAAAAAAAAAAAA//tEAAAAAAAoAAAJgAAAAAAAAAAAAAAARIAAAAASAAGACAAgAEAAJAAAAAAAAAAAASGJyZAAAAAAAAEAAAAAAAAAAGQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2wBIEAAAAQAAAKC4+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQWxhdmY1OS4xNi4xMDAAAAAAAAAAAAAAAP/bMEVwAAAD8AAAAAAAAAAAAGQAAAQBAAAEAcAAAMBwAAAYCAAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4WxEAAQAAAAsQAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtAVGRhdGECAgMEBQYHCQsNDxESFBgZGhoaHBwtLi8wMjQ3Ozw9PUFGSU1PUVFYWltaXGBkZWdpamoqbHB1fIKDg4iMjZCRkpSWl5iaoqOkpqmpra+wsbS2t7m7wMbIycnMzc/Q0dLT1NXW2Nnf3+Dl5ufn6Orq6+vt7vDx8vP09fX29vf4+fr7/P39/f4A" type="audio/mpeg">
+            <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU5LjE2LjEwMAAAAAAAAAAAAAAA//tEAAAAAAAoAAAJgAAAAAAAAAAAAAAARIAAAAASAAGACAAgAEAAJAAAAAAAAAAAASGJyZAAAAAAAAEAAAAAAAAAAGQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2wBIEAAAAQAAAKC4+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQWxhdmY1OS4xNi4xMDAAAAAAAAAAAAAAAP/bMEVwAAAD8AAAAAAAAAAAAGQAAAQBAAAEAcAAAMBwAAAYCAAAABAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4WxEAAQAAAAsQAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtAVGRhdGECAgMEBQYHCQsNDxESFBgZGhoaHBwtLi8wMjQ3Ozw9PUFGSU1PUVFYWltaXGBkZWdpamoqbHB1fIKDg4iMjZCRkpSWl5iaoqOkpqmpra+wsbS2t7m7wMbIycnMzc/Q0dLT1NXW2Nnf3+Dl5ufn6Orq6+vt7vDx8vP09fX29vf4+fr7/P39/f4A" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
         
@@ -81,56 +82,64 @@
     </div>
     
     <script>
-        // Get initial count from localStorage or default to 0
         let clickCount = parseInt(localStorage.getItem('bubbleClicks')) || 0; 
         
-        // Get the HTML elements by ID
         const bubbleButton = document.getElementById('bubble-button'); 
         const countDisplay = document.getElementById('click-count');
         const wrapElement = document.querySelector('.wrap'); 
         const clickSound = document.getElementById('click-sound-fx'); 
         
-        // Load the sound immediately to help bypass some browser restrictions
+        // This is a flag to track if the user has interacted once
+        let hasInteracted = false; 
+        
         clickSound.load(); 
 
-        // Function to update the display text
         function updateTextDisplay() {
             countDisplay.textContent = 'Total Clicks: ' + clickCount;
         }
 
-        // Function to create a floating bubble at a random horizontal position
         function createFloatingBubble(x, y) {
             const newBubble = document.createElement('span');
             newBubble.textContent = '🫧';
             newBubble.className = 'floating-bubble';
             
-            // Random horizontal positioning near the click
             const randomOffsetX = Math.random() * 50 - 25; 
             
-            // Set initial position (using event coordinates for the center)
             newBubble.style.left = `calc(${x}px + ${randomOffsetX}px - 15px)`; 
             newBubble.style.top = `${y}px`; 
             
             wrapElement.appendChild(newBubble);
             
-            // Automatically remove the element after the animation is done (2000ms = 2s)
             setTimeout(() => {
                 newBubble.remove();
             }, 2000); 
         }
+        
+        // 💡 NEW: Function to play sound reliably
+        function playClickSound() {
+            clickSound.currentTime = 0;
+            // The play() promise helps us detect if playback failed (e.g., due to restrictions)
+            clickSound.play().catch(error => {
+                console.error("Autoplay was prevented:", error);
+                // If playback fails once, we know the browser is blocking it.
+            });
+        }
 
-        // Initialize display on page load
         updateTextDisplay(); 
         
-        // Define the function that runs on click
         function handleBubbleClick(event) {
-            // 1. Play the sound effect
-            clickSound.currentTime = 0; 
-            clickSound.play().catch(e => console.error("Sound play blocked:", e)); 
-
-            clickCount += 1; // Increment the counter
+            // 1. Mark the interaction
+            if (!hasInteracted) {
+                hasInteracted = true;
+                // Attempt to play sound once to get permission from the browser
+                playClickSound();
+            } else {
+                // If we already interacted, just play the sound immediately
+                playClickSound();
+            }
             
-            // 2. Create the floating bubble at the click position
+            clickCount += 1; 
+            
             let clickX = event.clientX;
             let clickY = event.clientY;
 
@@ -142,17 +151,12 @@
 
             createFloatingBubble(clickX, clickY);
             
-            // 3. Update the text display
             updateTextDisplay(); 
-            
-            // 4. Save the new count to localStorage
             localStorage.setItem('bubbleClicks', clickCount); 
         }
 
-        // 5. Attach the function to the click event
+        // Attach event listeners
         bubbleButton.addEventListener('click', handleBubbleClick);
-        
-        // Bonus: Attach event to the whole wrap to allow clicking anywhere to make bubbles
         wrapElement.addEventListener('click', (event) => {
              if (event.target !== bubbleButton) { 
                 handleBubbleClick(event);
