@@ -1,93 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Interactive Bubble Popper</title>
-    
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            overflow: hidden; /* Prevent scrollbars when bubbles fly out */
-        }
-        
-        /* Main container layout using Flexbox */
-        .wrap {
-            height: 100%;
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
-            text-align: center;
-            padding: 20px;
-            position: relative; /* Essential for positioning floating bubbles */
-        }
-        
-        /* The clickable button styling */
-        #bubble-button { 
-            font-size: clamp(48px, 10vw, 128px);
-            transition: transform 0.1s; 
-            cursor: pointer; 
-            z-index: 10; /* Keep button above floating bubbles */
-            
-            /* 💡 NEW: Remove default focus outline */
-            outline: none; 
-        }
-        
-        /* Click feedback effect */
-        #bubble-button:active {
-             transform: scale(0.95); /* Shrink slightly on click for feedback */
-        }
-
-        /* Counter display styling */
-        #click-count {
-            font-size: clamp(16px, 4vw, 24px); 
-            margin-top: 20px;
-            color: #00838f; 
-            font-weight: bold;
-            z-index: 10;
-        }
-
-        /* CSS Animation for the Floating Bubble */
-        @keyframes float-up {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-50vh) scale(0.5); /* Fly up and shrink */
-            }
-        }
-
-        /* Styling for the dynamically created floating bubbles */
-        .floating-bubble {
-            position: absolute;
-            font-size: 30px; 
-            pointer-events: none; /* Allows clicks to pass through to the button */
-            animation: float-up 2s ease-out forwards; /* Run the animation for 2 seconds */
-            z-index: 5;
-        }
-    </style>
-</head>
-<body>
-    
-    <div class="wrap">
-        <audio id="click-sound-fx" preload="auto">
-            <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjM1LjEwMAAAAAAAAAAAAAAA//tEAAIAoAAAJgAAAAAAAAAAAAAAARIAAAAASAAGACAAgAEAAJAAAAAAAAAAAASGJyZAAAAAAAAEAAAAAAAAAAGQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2wBIEAAAAQAAAKC4+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQWxhdmY1OC4zNS4xMDAAAAAAAAAAAAAAAP/bMEVwAAAD8AAAAAAAAAAAAGQAAAQBAAAEAcAAAMBwAAAYCAAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4WxEAAQAAAAsQAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtAVGRhdGECAgMCBAUGChcYGSEiJCUmLTgxPD1BSEpOUVJWW1tqbnB6gYeKjI2PkJGSlJWXmJmaoqOkpqmpqa2xtLe4ur7ExsfIycnLzM/Q0dLT1NXW2Nnc3d7i4uPk5ebm5+jp6uvs7O3u7/Dx8vP09fX29vf4+fr7/P39/f4A" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-        
-        <span id="bubble-button">🫧</span> 
-        
-        <p id="click-count">Total Clicks: 0</p> 
-        
-        </div>
-    
-    <script>
+<script>
         // Get initial count from localStorage or default to 0
         let clickCount = parseInt(localStorage.getItem('bubbleClicks')) || 0; 
         
@@ -97,6 +8,9 @@
         const wrapElement = document.querySelector('.wrap'); 
         const clickSound = document.getElementById('click-sound-fx'); 
         
+        // 💡 NEW: Try loading the sound immediately to bypass some restrictions
+        clickSound.load(); 
+
         // Function to update the display text
         function updateTextDisplay() {
             countDisplay.textContent = 'Total Clicks: ' + clickCount;
@@ -130,7 +44,11 @@
         function handleBubbleClick(event) {
             // 1. Play the sound effect
             clickSound.currentTime = 0; 
-            clickSound.play().catch(e => console.error("Sound play blocked:", e)); 
+            // 💡 FIX: Use the 'finally' block to attempt to play without waiting
+            clickSound.play().catch(e => {
+                // If it fails (due to Autoplay Policy), we log the error and continue
+                console.error("Sound play blocked:", e);
+            }); 
 
             clickCount += 1; // Increment the counter
             
@@ -149,13 +67,8 @@
         
         // Bonus: Attach event to the whole wrap to allow clicking anywhere to make bubbles
         wrapElement.addEventListener('click', (event) => {
-             // Only run if the click wasn't on the button itself (already handled)
-             // and if the click was directly on the wrap, not another element inside it
              if (event.target !== bubbleButton) { 
                 handleBubbleClick(event);
             }
         });
     </script>
-    
-</body>
-</html>
