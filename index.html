@@ -1,83 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>إيموجي فراولة تفاعلي</title>
-    
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        
-        /* الحاوية الرئيسية: تم تعديلها لتشمل العداد عمودياً */
-        .wrap {
-            height: 100%;
-            display: flex;
-            flex-direction: column; /* لترتيب الفراولة والعداد فوق بعض */
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #ffe6f0, #fff0f8);
-            text-align: center;
-            padding: 20px; /* لضمان عدم التصاق المحتوى بالحواف على الجوال */
-        }
-        
-        /* تصميم عنصر الفراولة الأصلي مع إضافة ID والخصائص الحركية */
-        #strawberry { /* استخدمنا ID بدلاً من Class لربطها بالجافاسكريبت */
-            font-size: clamp(48px, 10vw, 128px);
-            display: inline-block;
-            
-            /* خصائص الحركة الجديدة */
-            transition: transform 0.3s ease-in-out; 
-        }
-
-        /* الحركة عند مرور الماوس (Hover Effect) */
-        #strawberry:hover {
-            transform: rotate(15deg) scale(1.1); /* يدور ويكبر قليلاً */
-            cursor: pointer; 
-        }
-        
-        /* تصميم عداد النقرات */
-        #click-count {
-            font-size: clamp(16px, 4vw, 24px); 
-            margin-top: 20px;
-            color: #d81b60; /* لون أحمر توتي جذاب */
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    
-    <div class="wrap">
-        <span id="strawberry">🍓</span> <p id="click-count">عدد النقرات: 0</p>
-    </div>
-    
-    <script>
-        // 1. تحديد متغير لحفظ عدد النقرات
-        let count = 0; 
-        
-        // 2. جلب العناصر من الصفحة بواسطة ID
-        const strawberryElement = document.getElementById('strawberry');
-        const countDisplay = document.getElementById('click-count');
-
-        // 3. تعريف الدالة التي تعمل عند النقر
-        function handleStrawberryClick() {
-            count = count + 1; // زيادة العداد
-            
-            // تحديث النص المعروض
-            countDisplay.textContent = 'عدد النقرات: ' + count; 
-            
-            // *ميزة إضافية*: عند كل 10 نقرات، أرسل رسالة تنبيه
-            if (count % 10 === 0) {
-                alert("تهانينا! لقد نقرت على الفراولة " + count + " مرة! استمر في الإنجاز! 🎉");
-            }
-        }
-
-        // 4. ربط الدالة بحدث النقر على الفراولة
-        strawberryElement.addEventListener('click', handleStrawberryClick);
-    </script>
-    
-</body>
-</html>
