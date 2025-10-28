@@ -3,13 +3,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Interactive Bubble Garden</title>
+    <title>Interactive Bubble Popper</title>
     
     <style>
         html, body {
             height: 100%;
             margin: 0;
             font-family: Arial, sans-serif;
+            overflow: hidden; /* Prevent scrollbars when bubbles fly out */
         }
         
         /* Main container layout using Flexbox */
@@ -19,45 +20,56 @@
             flex-direction: column; 
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #e0f7fa, #b2ebf2); /* Light blue gradient for bubbles */
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
             text-align: center;
             padding: 20px;
+            position: relative; /* Essential for positioning floating bubbles */
         }
         
         /* The clickable button styling */
-        #bubble-button { /* Changed ID to reflect bubble */
+        #bubble-button { 
             font-size: clamp(48px, 10vw, 128px);
-            display: inline-block;
-            transition: transform 0.3s ease-in-out; 
-        }
-
-        /* Hover effect on the button */
-        #bubble-button:hover {
-            transform: scale(1.1); /* Bubbles usually expand, not rotate */
+            transition: transform 0.1s; 
             cursor: pointer; 
+            z-index: 10; /* Keep button above floating bubbles */
+            
+            /* 💡 NEW: Remove default focus outline */
+            outline: none; 
         }
         
+        /* Click feedback effect */
+        #bubble-button:active {
+             transform: scale(0.95); /* Shrink slightly on click for feedback */
+        }
+
         /* Counter display styling */
         #click-count {
             font-size: clamp(16px, 4vw, 24px); 
             margin-top: 20px;
-            color: #00838f; /* Darker blue for counter */
+            color: #00838f; 
             font-weight: bold;
+            z-index: 10;
         }
-        
-        /* New styling for the bubble collection display */
-        #bubble-display { /* Changed ID to reflect bubble */
-            width: 80%; 
-            min-height: 50px;
-            margin: 20px auto;
-            border: 1px dashed #4dd0e1; /* Light blue dashed border */
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
-            flex-wrap: wrap; 
-            justify-content: center; 
+
+        /* CSS Animation for the Floating Bubble */
+        @keyframes float-up {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50vh) scale(0.5); /* Fly up and shrink */
+            }
+        }
+
+        /* Styling for the dynamically created floating bubbles */
+        .floating-bubble {
+            position: absolute;
             font-size: 30px; 
-            gap: 5px; 
+            pointer-events: none; /* Allows clicks to pass through to the button */
+            animation: float-up 2s ease-out forwards; /* Run the animation for 2 seconds */
+            z-index: 5;
         }
     </style>
 </head>
@@ -65,67 +77,84 @@
     
     <div class="wrap">
         <audio id="click-sound-fx" preload="auto">
-            <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjM1LjEwMAAAAAAAAAAAAAAA//tEAAIAoAAAJgAAAAAAAAAAAAAAARIAAAAASAAGACAAgAEAAJAAAAAAAAAAAASGJyZAAAAAAAAEAAAAAAAAAAGQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2wBIEAAAAQAAAKC4+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQWxhdmY1OC4zNS4xMDAAAAAAAAAAAAAAAP/bMEVwAAAD8AAAAAAAAAAAAGQAAAQBAAAEAcAAAMBwAAAYCAAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCP/bOEiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAExhdmY1OC4zNS4xMDAAAAAAAAAAAAAAAAAAAAAA//tEMgUAAQAAAKAAAAAAAACAAACAAAAAAgAAAAAAABQAAAQBAAAEAUAAAMBwAAAYCAAAAEAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4WxEAAQAAAAsQAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtAVGRhdGECAgMCBAUGChcYGSEiJCUmLTgxPD1BSEpOUVJWW1tqbnB6gYeKjI2PkJGSlJWXmJmaoqOkpqmpqa2xtLe4ur7ExsfIycnLzM/Q0dLT1NXW2Nnc3d7i4uPk5ebm5+jp6uvs7O3u7/Dx8vP09fX29vf4+fr7/P39/f4A" type="audio/mpeg">
+            <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjM1LjEwMAAAAAAAAAAAAAAA//tEAAIAoAAAJgAAAAAAAAAAAAAAARIAAAAASAAGACAAgAEAAJAAAAAAAAAAAASGJyZAAAAAAAAEAAAAAAAAAAGQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2wBIEAAAAQAAAKC4+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQWxhdmY1OC4zNS4xMDAAAAAAAAAAAAAAAP/bMEVwAAAD8AAAAAAAAAAAAGQAAAQBAAAEAcAAAMBwAAAYCAAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4WxEAAQAAAAsQAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtAVGRhdGECAgMCBAUGChcYGSEiJCUmLTgxPD1BSEpOUVJWW1tqbnB6gYeKjI2PkJGSlJWXmJmaoqOkpqmpqa2xtLe4ur7ExsfIycnLzM/Q0dLT1NXW2Nnc3d7i4uPk5ebm5+jp6uvs7O3u7/Dx8vP09fX29vf4+fr7/P39/f4A" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
         
-        <span id="bubble-button">🫧</span> <div id="bubble-display"> </div>
+        <span id="bubble-button">🫧</span> 
         
         <p id="click-count">Total Clicks: 0</p> 
-    </div>
+        
+        </div>
     
     <script>
         // Get initial count from localStorage or default to 0
-        let clickCount = parseInt(localStorage.getItem('bubbleClicks')) || 0; // Changed localStorage key
+        let clickCount = parseInt(localStorage.getItem('bubbleClicks')) || 0; 
         
         // Get the HTML elements by ID
-        const bubbleButton = document.getElementById('bubble-button'); // Changed element name
+        const bubbleButton = document.getElementById('bubble-button'); 
         const countDisplay = document.getElementById('click-count');
-        const bubbleDisplay = document.getElementById('bubble-display'); // Changed element name
+        const wrapElement = document.querySelector('.wrap'); 
         const clickSound = document.getElementById('click-sound-fx'); 
         
-        // Function to update the display text (e.g., "Clicks: 15")
+        // Function to update the display text
         function updateTextDisplay() {
             countDisplay.textContent = 'Total Clicks: ' + clickCount;
         }
-        
-        // Function to dynamically create and display the bubbles
-        function renderBubbles() { // Changed function name
-            bubbleDisplay.innerHTML = '';
+
+        // Function to create a floating bubble at a random horizontal position
+        function createFloatingBubble(x, y) {
+            const newBubble = document.createElement('span');
+            newBubble.textContent = '🫧';
+            newBubble.className = 'floating-bubble';
             
-            for (let i = 0; i < clickCount; i++) {
-                const bubble = document.createElement('span'); // Changed variable name
-                bubble.textContent = '🫧'; // Changed emoji
-                bubbleDisplay.appendChild(bubble);
-            }
+            // Random horizontal positioning near the click
+            const randomOffsetX = Math.random() * 50 - 25; 
+            
+            // Set initial position (using event coordinates for the center)
+            newBubble.style.left = `calc(${x}px + ${randomOffsetX}px - 15px)`; 
+            newBubble.style.top = `${y}px`; 
+            
+            wrapElement.appendChild(newBubble);
+            
+            // Automatically remove the element after the animation is done (2000ms = 2s)
+            setTimeout(() => {
+                newBubble.remove();
+            }, 2000); 
         }
 
-        // Initialize display and rendering on page load
+        // Initialize display on page load
         updateTextDisplay(); 
-        renderBubbles(); // Call renderBubbles on load
         
         // Define the function that runs on click
-        function handleBubbleClick() { // Changed function name
+        function handleBubbleClick(event) {
+            // 1. Play the sound effect
             clickSound.currentTime = 0; 
-            clickSound.play().catch(e => console.error("Sound play error:", e)); 
+            clickSound.play().catch(e => console.error("Sound play blocked:", e)); 
 
-            clickCount += 1; 
+            clickCount += 1; // Increment the counter
             
-            // Update all displays
+            // 2. Create the floating bubble at the click position
+            createFloatingBubble(event.clientX, event.clientY);
+            
+            // 3. Update the text display
             updateTextDisplay(); 
-            renderBubbles(); // Render the new total collection
             
-            // Save the new count to localStorage
-            localStorage.setItem('bubbleClicks', clickCount); // Changed localStorage key
-
-            // Bonus feature: send an alert every 10 clicks
-            if (clickCount % 10 === 0) {
-                alert("You created " + clickCount + " bubbles! Amazing! 🎉");
-            }
+            // 4. Save the new count to localStorage
+            localStorage.setItem('bubbleClicks', clickCount); 
         }
 
-        // Attach the function to the click event
-        bubbleButton.addEventListener('click', handleBubbleClick); // Changed button and function
+        // 5. Attach the function to the click event
+        bubbleButton.addEventListener('click', handleBubbleClick);
+        
+        // Bonus: Attach event to the whole wrap to allow clicking anywhere to make bubbles
+        wrapElement.addEventListener('click', (event) => {
+             // Only run if the click wasn't on the button itself (already handled)
+             // and if the click was directly on the wrap, not another element inside it
+             if (event.target !== bubbleButton) { 
+                handleBubbleClick(event);
+            }
+        });
     </script>
     
 </body>
