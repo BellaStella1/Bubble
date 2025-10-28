@@ -32,11 +32,9 @@
             z-index: 10; 
             outline: none; 
             user-select: none; 
-            /* 💡 NEW: Make the background transparent */
             background: transparent; 
-            /* NEW: Remove any default border that might be there for span */
             border: none;
-            padding: 0; /* Remove default padding */
+            padding: 0; 
         }
         
         #bubble-button:active {
@@ -74,15 +72,14 @@
 <body>
     
     <div class="wrap">
+        <!-- استبدلي click.mp3 باسم ملف الصوت عندك -->
         <audio id="click-sound-fx" preload="auto">
-            <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU5LjE2LjEwMAAAAAAAAAAAAAAA//tEAAAAAAAoAAAJgAAAAAAAAAAAAAAARIAAAAASAAGACAAgAEAAJAAAAAAAAAAAASGJyZAAAAAAAAEAAAAAAAAAAGQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2wBIEAAAAQAAAKC4+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQWxhdmY1OS4xNi4xMDAAAAAAAAAAAAAAAP/bMEVwAAAD8AAAAAAAAAAAAGQAAAQBAAAEAcAAAMBwAAAYCAAAABAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4WxEAAQAAAAsQAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtAVGRhdGECAgMEBQYHCQsNDxESFBgZGhoaHBwtLi8wMjQ3Ozw9PUFGSU1PUVFYWltaXGBkZWdpamoqbHB1fIKDg4iMjZCRkpSWl5iaoqOkpqmpra+wsbS2t7m7wMbIycnMzc/Q0dLT1NXW2Nnf3+Dl5ufn6Orq6+vt7vDx8vP09fX29vf4+fr7/P39/f4A" type="audio/mpeg">
+            <source src="click.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
         
         <span id="bubble-button">🫧</span> 
-        
         <p id="click-count">Total Clicks: 0</p> 
-        
     </div>
     
     <script>
@@ -92,8 +89,6 @@
         const countDisplay = document.getElementById('click-count');
         const wrapElement = document.querySelector('.wrap'); 
         const clickSound = document.getElementById('click-sound-fx'); 
-        
-        let hasInteracted = false; 
         
         clickSound.load(); 
 
@@ -105,36 +100,22 @@
             const newBubble = document.createElement('span');
             newBubble.textContent = '🫧';
             newBubble.className = 'floating-bubble';
-            
             const randomOffsetX = Math.random() * 50 - 25; 
-            
             newBubble.style.left = `calc(${x}px + ${randomOffsetX}px - 15px)`; 
             newBubble.style.top = `${y}px`; 
-            
             wrapElement.appendChild(newBubble);
-            
-            setTimeout(() => {
-                newBubble.remove();
-            }, 2000); 
+            setTimeout(() => newBubble.remove(), 2000); 
         }
         
         function playClickSound() {
             clickSound.currentTime = 0;
-            clickSound.play().catch(error => {
-                console.error("Autoplay was prevented:", error);
-            });
+            clickSound.play().catch(err => console.warn("Sound play blocked:", err));
         }
 
         updateTextDisplay(); 
         
         function handleBubbleClick(event) {
-            if (!hasInteracted) {
-                hasInteracted = true;
-                playClickSound();
-            } else {
-                playClickSound();
-            }
-            
+            playClickSound();
             clickCount += 1; 
             
             let clickX = event.clientX;
@@ -147,7 +128,6 @@
             }
 
             createFloatingBubble(clickX, clickY);
-            
             updateTextDisplay(); 
             localStorage.setItem('bubbleClicks', clickCount); 
         }
