@@ -1,138 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Interactive Bubble Popper</title>
-
-<style>
-html, body {
-    height: 100%;
-    margin: 0;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-}
-.wrap {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
-    text-align: center;
-    padding: 20px;
-    position: relative;
-}
-#bubble-button {
-    font-size: clamp(48px, 10vw, 128px);
-    transition: transform 0.1s;
-    cursor: pointer;
-    z-index: 10;
-    outline: none;
-    user-select: none;
-    background: transparent;
-    border: none;
-    padding: 0;
-}
-#bubble-button:active {
-    transform: scale(0.95);
-}
-#click-count {
-    font-size: clamp(16px, 4vw, 24px);
-    margin-top: 20px;
-    color: #00838f;
-    font-weight: bold;
-    z-index: 10;
-}
-@keyframes float-up {
-    0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-50vh) scale(0.5);
-    }
-}
-.floating-bubble {
-    position: absolute;
-    font-size: 30px;
-    pointer-events: none;
-    animation: float-up 2s ease-out forwards;
-    z-index: 5;
-}
-</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Interactive Bubble Popper</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        .wrap {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+        #bubble-button {
+            font-size: clamp(48px, 10vw, 128px);
+            transition: transform 0.1s;
+            cursor: pointer;
+            z-index: 10;
+            outline: none;
+            user-select: none;
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+        #bubble-button:active {
+            transform: scale(0.95);
+        }
+        #click-count {
+            font-size: clamp(16px, 4vw, 24px);
+            margin-top: 20px;
+            color: #00838f;
+            font-weight: bold;
+            z-index: 10;
+        }
+        @keyframes float-up {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50vh) scale(0.5);
+            }
+        }
+        .floating-bubble {
+            position: absolute;
+            font-size: 30px;
+            pointer-events: none;
+            animation: float-up 2s ease-out forwards;
+            z-index: 5;
+        }
+    </style>
 </head>
 <body>
+    <div class="wrap">
+        <audio id="click-sound-fx" preload="auto">
+            <source src="https://bellastella1.github.io/Bubble/bubble.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <span id="bubble-button">🫧</span>
+        <p id="click-count">Total Clicks: 0</p>
+    </div>
+    <script>
+        let clickCount = parseInt(localStorage.getItem('bubbleClicks')) || 0;
+        const bubbleButton = document.getElementById('bubble-button');
+        const countDisplay = document.getElementById('click-count');
+        const wrapElement = document.querySelector('.wrap');
+        const clickSound = document.getElementById('click-sound-fx');
 
-<div class="wrap">
-    <!-- صوت فقاعات مدمج Base64 -->
-    <audio id="click-sound-fx" preload="auto">
-        <source src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA..." type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+        clickSound.load();
 
-    <span id="bubble-button">🫧</span>
-    <p id="click-count">Total Clicks: 0</p>
-</div>
+        function updateTextDisplay() {
+            countDisplay.textContent = 'Total Clicks: ' + clickCount;
+        }
 
-<script>
-let clickCount = parseInt(localStorage.getItem('bubbleClicks')) || 0;
-const bubbleButton = document.getElementById('bubble-button');
-const countDisplay = document.getElementById('click-count');
-const wrapElement = document.querySelector('.wrap');
-const clickSound = document.getElementById('click-sound-fx');
+        function createFloatingBubble(x, y) {
+            const newBubble = document.createElement('span');
+            newBubble.textContent = '🫧';
+            newBubble.className = 'floating-bubble';
+            const randomOffsetX = Math.random() * 50 - 25;
+            newBubble.style.left = `calc(${x}px + ${randomOffsetX}px - 15px)`;
+            newBubble.style.top = `${y}px`;
+            wrapElement.appendChild(newBubble);
+            setTimeout(() => newBubble.remove(), 2000);
+        }
 
-clickSound.load();
+        function playClickSound() {
+            const soundClone = clickSound.cloneNode(true);
+            soundClone.currentTime = 0;
+            soundClone.play().catch(err => console.warn("Sound play blocked:", err));
+        }
 
-function updateTextDisplay() {
-    countDisplay.textContent = 'Total Clicks: ' + clickCount;
-}
+        updateTextDisplay();
 
-function createFloatingBubble(x, y) {
-    const newBubble = document.createElement('span');
-    newBubble.textContent = '🫧';
-    newBubble.className = 'floating-bubble';
-    const randomOffsetX = Math.random() * 50 - 25;
-    newBubble.style.left = `calc(${x}px + ${randomOffsetX}px - 15px)`;
-    newBubble.style.top = `${y}px`;
-    wrapElement.appendChild(newBubble);
-    setTimeout(() => newBubble.remove(), 2000);
-}
+        function handleBubbleClick(event) {
+            playClickSound();
+            clickCount += 1;
 
-function playClickSound() {
-    const soundClone = clickSound.cloneNode(true);
-    soundClone.currentTime = 0;
-    soundClone.play().catch(err => console.warn("Sound play blocked:", err));
-}
+            let clickX = event.clientX;
+            let clickY = event.clientY;
 
-updateTextDisplay();
+            if (event.target === bubbleButton) {
+                const rect = bubbleButton.getBoundingClientRect();
+                clickX = rect.left + rect.width / 2;
+                clickY = rect.top + rect.height / 2;
+            }
 
-function handleBubbleClick(event) {
-    playClickSound();
-    clickCount += 1;
+            createFloatingBubble(clickX, clickY);
+            updateTextDisplay();
+            localStorage.setItem('bubbleClicks', clickCount);
+        }
 
-    let clickX = event.clientX;
-    let clickY = event.clientY;
-
-    if (event.target === bubbleButton) {
-        const rect = bubbleButton.getBoundingClientRect();
-        clickX = rect.left + rect.width / 2;
-        clickY = rect.top + rect.height / 2;
-    }
-
-    createFloatingBubble(clickX, clickY);
-    updateTextDisplay();
-    localStorage.setItem('bubbleClicks', clickCount);
-}
-
-bubbleButton.addEventListener('click', handleBubbleClick);
-wrapElement.addEventListener('click', (event) => {
-    if (event.target !== bubbleButton) {
-        handleBubbleClick(event);
-    }
-});
-</script>
-
+        bubbleButton.addEventListener('click', handleBubbleClick);
+        wrapElement.addEventListener('click', (event) => {
+            if (event.target !== bubbleButton) {
+                handleBubbleClick(event);
+            }
+        });
+    </script>
 </body>
 </html>
