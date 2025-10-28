@@ -10,10 +10,9 @@
             height: 100%;
             margin: 0;
             font-family: Arial, sans-serif;
-            overflow: hidden; /* Prevent scrollbars when bubbles fly out */
+            overflow: hidden; 
         }
         
-        /* Main container layout using Flexbox */
         .wrap {
             height: 100%;
             display: flex;
@@ -23,25 +22,22 @@
             background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
             text-align: center;
             padding: 20px;
-            position: relative; /* Essential for positioning floating bubbles */
+            position: relative; 
         }
         
-        /* The clickable button styling */
         #bubble-button { 
             font-size: clamp(48px, 10vw, 128px);
             transition: transform 0.1s; 
             cursor: pointer; 
             z-index: 10; 
-            outline: none; /* FIX: Removes the blue focus outline */
-            user-select: none; /* NEW: Prevents text/emoji selection which sometimes causes artifacts */
+            outline: none; 
+            user-select: none; 
         }
         
-        /* Click feedback effect */
         #bubble-button:active {
-             transform: scale(0.95); /* Shrink slightly on click for feedback */
+             transform: scale(0.95); 
         }
 
-        /* Counter display styling */
         #click-count {
             font-size: clamp(16px, 4vw, 24px); 
             margin-top: 20px;
@@ -50,7 +46,6 @@
             z-index: 10;
         }
 
-        /* CSS Animation for the Floating Bubble */
         @keyframes float-up {
             0% {
                 opacity: 1;
@@ -58,16 +53,15 @@
             }
             100% {
                 opacity: 0;
-                transform: translateY(-50vh) scale(0.5); /* Fly up and shrink */
+                transform: translateY(-50vh) scale(0.5); 
             }
         }
 
-        /* Styling for the dynamically created floating bubbles */
         .floating-bubble {
             position: absolute;
             font-size: 30px; 
-            pointer-events: none; /* Allows clicks to pass through to the button */
-            animation: float-up 2s ease-out forwards; /* Run the animation for 2 seconds */
+            pointer-events: none; 
+            animation: float-up 2s ease-out forwards; 
             z-index: 5;
         }
     </style>
@@ -76,7 +70,7 @@
     
     <div class="wrap">
         <audio id="click-sound-fx" preload="auto">
-            <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjM1LjEwMAAAAAAAAAAAAAAA//tEAAIAoAAAJgAAAAAAAAAAAAAAARIAAAAASAAGACAAgAEAAJAAAAAAAAAAAASGJyZAAAAAAAAEAAAAAAAAAAGQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2wBIEAAAAQAAAKC4+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQWxhdmY1OC4zNS4xMDAAAAAAAAAAAAAAAP/bMEVwAAAD8AAAAAAAAAAAAGQAAAQBAAAEAcAAAMBwAAAYCAAAABAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4WxEAAQAAAAsQAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtAVGRhdGECAgMCBAUGChcYGSEiJCUmLTgxPD1BSEpOUVJWW1tqbnB6gYeKjI2PkJGSlJWXmJmaoqOkpqmpqa2xtLe4ur7ExsfIycnLzM/Q0dLT1NXW2Nnc3d7i4uPk5ebm5+jp6uvs7O3u7/Dx8vP09fX29vf4+fr7/P39/f4A" type="audio/mpeg">
+            <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU5LjE2LjEwMAAAAAAAAAAAAAAA//tEAAAAAAAoAAAJgAAAAAAAAAAAAAAARIAAAAASAAGACAAgAEAAJAAAAAAAAAAAASGJyZAAAAAAAAEAAAAAAAAAAGQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2wBIEAAAAQAAAKC4+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQWxhdmY1OS4xNi4xMDAAAAAAAAAAAAAAAP/bMEVwAAAD8AAAAAAAAAAAAGQAAAQBAAAEAcAAAMBwAAAYCAAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4WxEAAQAAAAsQAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtAVGRhdGECAgMEBQYHCQsNDxESFBgZGhoaHBwtLi8wMjQ3Ozw9PUFGSU1PUVFYWltaXGBkZWdpamoqbHB1fIKDg4iMjZCRkpSWl5iaoqOkpqmpra+wsbS2t7m7wMbIycnMzc/Q0dLT1NXW2Nnf3+Dl5ufn6Orq6+vt7vDx8vP09fX29vf4+fr7/P39/f4A" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
         
@@ -137,20 +131,14 @@
             clickCount += 1; // Increment the counter
             
             // 2. Create the floating bubble at the click position
-            // Use clientX/Y from the event if available, otherwise estimate based on button position
             let clickX = event.clientX;
             let clickY = event.clientY;
 
-            // Fallback for clicks outside the button
-            if (event.target === wrapElement) {
-                clickX = event.clientX;
-                clickY = event.clientY;
-            } else if (event.target === bubbleButton) {
+            if (event.target === bubbleButton) {
                  const rect = bubbleButton.getBoundingClientRect();
                  clickX = rect.left + rect.width / 2;
                  clickY = rect.top + rect.height / 2;
             }
-
 
             createFloatingBubble(clickX, clickY);
             
@@ -166,7 +154,6 @@
         
         // Bonus: Attach event to the whole wrap to allow clicking anywhere to make bubbles
         wrapElement.addEventListener('click', (event) => {
-             // Only run if the click was not directly on the button (to avoid double count)
              if (event.target !== bubbleButton) { 
                 handleBubbleClick(event);
             }
