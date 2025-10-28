@@ -6,7 +6,6 @@
     <title>Interactive Bubble Popper</title>
     
     <style>
-        /* CSS Styles remain the same */
         html, body {
             height: 100%;
             margin: 0;
@@ -33,6 +32,11 @@
             z-index: 10; 
             outline: none; 
             user-select: none; 
+            /* 💡 NEW: Make the background transparent */
+            background: transparent; 
+            /* NEW: Remove any default border that might be there for span */
+            border: none;
+            padding: 0; /* Remove default padding */
         }
         
         #bubble-button:active {
@@ -89,7 +93,6 @@
         const wrapElement = document.querySelector('.wrap'); 
         const clickSound = document.getElementById('click-sound-fx'); 
         
-        // This is a flag to track if the user has interacted once
         let hasInteracted = false; 
         
         clickSound.load(); 
@@ -115,26 +118,20 @@
             }, 2000); 
         }
         
-        // 💡 NEW: Function to play sound reliably
         function playClickSound() {
             clickSound.currentTime = 0;
-            // The play() promise helps us detect if playback failed (e.g., due to restrictions)
             clickSound.play().catch(error => {
                 console.error("Autoplay was prevented:", error);
-                // If playback fails once, we know the browser is blocking it.
             });
         }
 
         updateTextDisplay(); 
         
         function handleBubbleClick(event) {
-            // 1. Mark the interaction
             if (!hasInteracted) {
                 hasInteracted = true;
-                // Attempt to play sound once to get permission from the browser
                 playClickSound();
             } else {
-                // If we already interacted, just play the sound immediately
                 playClickSound();
             }
             
@@ -155,7 +152,6 @@
             localStorage.setItem('bubbleClicks', clickCount); 
         }
 
-        // Attach event listeners
         bubbleButton.addEventListener('click', handleBubbleClick);
         wrapElement.addEventListener('click', (event) => {
              if (event.target !== bubbleButton) { 
