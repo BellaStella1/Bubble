@@ -72,9 +72,9 @@
 <body>
     
     <div class="wrap">
-        <!-- اسم الملف بالمسافات تم تحويلها إلى %20 -->
+        <!-- صوت فقاعة مدمج بالـBase64 -->
         <audio id="click-sound-fx" preload="auto">
-            <source src="Bubble%20sound%20.mp3" type="audio/mpeg">
+            <source src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA..." type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
         
@@ -89,8 +89,7 @@
         const countDisplay = document.getElementById('click-count');
         const wrapElement = document.querySelector('.wrap'); 
         const clickSound = document.getElementById('click-sound-fx'); 
-        
-        clickSound.load(); 
+        clickSound.load(); // تأكد الصوت جاهز فورًا
 
         function updateTextDisplay() {
             countDisplay.textContent = 'Total Clicks: ' + clickCount;
@@ -108,8 +107,10 @@
         }
         
         function playClickSound() {
-            clickSound.currentTime = 0;
-            clickSound.play().catch(err => console.warn("Sound play blocked:", err));
+            // نسخ الصوت لتشغيله مباشرة بدون تأخير
+            const soundClone = clickSound.cloneNode(true);
+            soundClone.currentTime = 0;
+            soundClone.play().catch(err => console.warn("Sound play blocked:", err));
         }
 
         updateTextDisplay(); 
