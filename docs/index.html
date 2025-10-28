@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>إيموجي فراولة تفاعلي</title>
+    <title>Interactive Bubble Garden</title>
     
     <style>
         html, body {
@@ -12,71 +12,120 @@
             font-family: Arial, sans-serif;
         }
         
-        /* الحاوية الرئيسية: تم تعديلها لتشمل العداد عمودياً */
+        /* Main container layout using Flexbox */
         .wrap {
             height: 100%;
             display: flex;
-            flex-direction: column; /* لترتيب الفراولة والعداد فوق بعض */
+            flex-direction: column; 
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #ffe6f0, #fff0f8);
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2); /* Light blue gradient for bubbles */
             text-align: center;
-            padding: 20px; /* لضمان عدم التصاق المحتوى بالحواف على الجوال */
+            padding: 20px;
         }
         
-        /* تصميم عنصر الفراولة الأصلي مع إضافة ID والخصائص الحركية */
-        #strawberry { /* استخدمنا ID بدلاً من Class لربطها بالجافاسكريبت */
+        /* The clickable button styling */
+        #bubble-button { /* Changed ID to reflect bubble */
             font-size: clamp(48px, 10vw, 128px);
             display: inline-block;
-            
-            /* خصائص الحركة الجديدة */
             transition: transform 0.3s ease-in-out; 
         }
 
-        /* الحركة عند مرور الماوس (Hover Effect) */
-        #strawberry:hover {
-            transform: rotate(15deg) scale(1.1); /* يدور ويكبر قليلاً */
+        /* Hover effect on the button */
+        #bubble-button:hover {
+            transform: scale(1.1); /* Bubbles usually expand, not rotate */
             cursor: pointer; 
         }
         
-        /* تصميم عداد النقرات */
+        /* Counter display styling */
         #click-count {
             font-size: clamp(16px, 4vw, 24px); 
             margin-top: 20px;
-            color: #d81b60; /* لون أحمر توتي جذاب */
+            color: #00838f; /* Darker blue for counter */
             font-weight: bold;
+        }
+        
+        /* New styling for the bubble collection display */
+        #bubble-display { /* Changed ID to reflect bubble */
+            width: 80%; 
+            min-height: 50px;
+            margin: 20px auto;
+            border: 1px dashed #4dd0e1; /* Light blue dashed border */
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            flex-wrap: wrap; 
+            justify-content: center; 
+            font-size: 30px; 
+            gap: 5px; 
         }
     </style>
 </head>
 <body>
     
     <div class="wrap">
-        <span id="strawberry">🍓</span> <p id="click-count">عدد النقرات: 0</p>
+        <audio id="click-sound-fx" preload="auto">
+            <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjM1LjEwMAAAAAAAAAAAAAAA//tEAAIAoAAAJgAAAAAAAAAAAAAAARIAAAAASAAGACAAgAEAAJAAAAAAAAAAAASGJyZAAAAAAAAEAAAAAAAAAAGQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2wBIEAAAAQAAAKC4+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQWxhdmY1OC4zNS4xMDAAAAAAAAAAAAAAAP/bMEVwAAAD8AAAAAAAAAAAAGQAAAQBAAAEAcAAAMBwAAAYCAAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCP/bOEiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAExhdmY1OC4zNS4xMDAAAAAAAAAAAAAAAAAAAAAA//tEMgUAAQAAAKAAAAAAAACAAACAAAAAAgAAAAAAABQAAAQBAAAEAUAAAMBwAAAYCAAAAEAAABAAABAAABAAMBBAMBBAcBBAYBAAECggIHBgYDAAYGBAQCBAcBAAEHBgYEAAgEBQQCAQYGBQQAAAECAAQDAwQCAgYDBgICAgYDBgICAgYDCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4WxEAAQAAAAsQAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtAVGRhdGECAgMCBAUGChcYGSEiJCUmLTgxPD1BSEpOUVJWW1tqbnB6gYeKjI2PkJGSlJWXmJmaoqOkpqmpqa2xtLe4ur7ExsfIycnLzM/Q0dLT1NXW2Nnc3d7i4uPk5ebm5+jp6uvs7O3u7/Dx8vP09fX29vf4+fr7/P39/f4A" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        
+        <span id="bubble-button">🫧</span> <div id="bubble-display"> </div>
+        
+        <p id="click-count">Total Clicks: 0</p> 
     </div>
     
     <script>
-        // 1. تحديد متغير لحفظ عدد النقرات
-        let count = 0; 
+        // Get initial count from localStorage or default to 0
+        let clickCount = parseInt(localStorage.getItem('bubbleClicks')) || 0; // Changed localStorage key
         
-        // 2. جلب العناصر من الصفحة بواسطة ID
-        const strawberryElement = document.getElementById('strawberry');
+        // Get the HTML elements by ID
+        const bubbleButton = document.getElementById('bubble-button'); // Changed element name
         const countDisplay = document.getElementById('click-count');
-
-        // 3. تعريف الدالة التي تعمل عند النقر
-        function handleStrawberryClick() {
-            count = count + 1; // زيادة العداد
+        const bubbleDisplay = document.getElementById('bubble-display'); // Changed element name
+        const clickSound = document.getElementById('click-sound-fx'); 
+        
+        // Function to update the display text (e.g., "Clicks: 15")
+        function updateTextDisplay() {
+            countDisplay.textContent = 'Total Clicks: ' + clickCount;
+        }
+        
+        // Function to dynamically create and display the bubbles
+        function renderBubbles() { // Changed function name
+            bubbleDisplay.innerHTML = '';
             
-            // تحديث النص المعروض
-            countDisplay.textContent = 'عدد النقرات: ' + count; 
-            
-            // *ميزة إضافية*: عند كل 10 نقرات، أرسل رسالة تنبيه
-            if (count % 10 === 0) {
-                alert("تهانينا! لقد نقرت على الفراولة " + count + " مرة! استمر في الإنجاز! 🎉");
+            for (let i = 0; i < clickCount; i++) {
+                const bubble = document.createElement('span'); // Changed variable name
+                bubble.textContent = '🫧'; // Changed emoji
+                bubbleDisplay.appendChild(bubble);
             }
         }
 
-        // 4. ربط الدالة بحدث النقر على الفراولة
-        strawberryElement.addEventListener('click', handleStrawberryClick);
+        // Initialize display and rendering on page load
+        updateTextDisplay(); 
+        renderBubbles(); // Call renderBubbles on load
+        
+        // Define the function that runs on click
+        function handleBubbleClick() { // Changed function name
+            clickSound.currentTime = 0; 
+            clickSound.play().catch(e => console.error("Sound play error:", e)); 
+
+            clickCount += 1; 
+            
+            // Update all displays
+            updateTextDisplay(); 
+            renderBubbles(); // Render the new total collection
+            
+            // Save the new count to localStorage
+            localStorage.setItem('bubbleClicks', clickCount); // Changed localStorage key
+
+            // Bonus feature: send an alert every 10 clicks
+            if (clickCount % 10 === 0) {
+                alert("You created " + clickCount + " bubbles! Amazing! 🎉");
+            }
+        }
+
+        // Attach the function to the click event
+        bubbleButton.addEventListener('click', handleBubbleClick); // Changed button and function
     </script>
     
 </body>
